@@ -105,6 +105,57 @@ public class HomeController {
         return "login/homeLayout";
     }
 
+    
+    // ユーザー更新用処理
+    @PostMapping(value = "/userDetail", params = "update")
+    public String postuserDetailUpdate(@ModelAttribute SignupForm form, Model model) {
+    
+        System.out.println("更新ボタンの処理");
+
+        // Userインスタンスの生成
+        User user = new User();
+
+        // フォームクラスをUserクラスに変換
+        user.setUserId(form.getUserId()); // ユーザーID
+        user.setPassword(form.getPassword()); // パスワード
+        user.setUserName(form.getUserName()); // ユーザー名
+        user .setBirthday(form.getBirthday()); // 誕生日
+        user.setAge(form.getAge()); // 年齢
+        user.setMarriage(form.isMarriage()); // 結婚ステータス
+
+        // 更新実行
+        boolean result = userService.updateOne(user);
+
+        if (result == true) {
+            model.addAttribute("result", "更新成功");
+        } else {
+            model.addAttribute("result", "更新失敗");
+        }
+
+        // ユーザー一覧画面を表示
+        return getUserList(model);
+    }
+
+
+    // ユーザー削除用処理
+    @PostMapping(value = "/userDetail", params = "delete")
+    public String postUserDetailDelete(@ModelAttribute SignupForm form, Model model) {
+    
+        System.out.println("削除ボタンの処理");
+
+        // 削除実行
+        boolean result = userService.deleteOne(form.getUserId());
+    
+        if (result == true) {
+            model.addAttribute("result", "削除成功");
+        } else {
+            model.addAttribute("result", "削除失敗");
+        }
+
+        // ユーザー一覧画面を表示
+        return getUserList(model);
+    }
+
 
     // ログアウト用メソッド
     @PostMapping("/logout")
