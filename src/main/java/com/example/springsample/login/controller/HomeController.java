@@ -1,17 +1,20 @@
 package com.example.springsample.login.controller;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
 import com.example.springsample.login.domain.model.SignupForm;
 import com.example.springsample.login.domain.model.User;
 import com.example.springsample.login.domain.service.UserService;
@@ -167,9 +170,30 @@ public class HomeController {
     
     // ユーザー一覧のCSV出力用メソッド
     @GetMapping("/userList/csv")
-    public String getUserListCsv(Model model) {
+    public ResponseEntity<byte[]> getUserListCsv(Model model) {
+
+        // ユーザーを全件取得してCSVをサーバーに保存する
+        userService.userCsvOut();
+
+        byte[] bytes = null;
+
+        try {
         
-        // 現段階では、何もせずにユーザー一覧画面に戻るだけ
-        return getUserList(model);
+            // サーバーに保存されているsample.csvファイルをbyteで取得する
+            bytes = userService.getFile("sample.csv");
+
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        // HTTPヘッダーの取得
+        org.springframework.http.HttpHeaders header = new HttpHeaders();
+        header.add("Content-Type", "text/csv; charset=UTF-8");
+        header.setContentDispositionFormData("filename", "sample.csv");
+
+
+        // sample.csvを戻す
+        return new ResponseEntity<>(bytes, header, HttpStatus.OK);
+        
     }
 }
