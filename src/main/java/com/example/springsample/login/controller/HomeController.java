@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class HomeController {
     // ホーム画面のGET用メソッド
     @GetMapping("/home")
     public String getHome(Model model) {
-        // コンテンツ部b軍にホーム画面を表示するための文字列を登録
+        // コンテンツ部分にホーム画面を表示するための文字列を登録
         model.addAttribute("contents", "login/home :: home_contents");
 
         return "login/homeLayout";
@@ -126,13 +127,19 @@ public class HomeController {
         user.setAge(form.getAge()); // 年齢
         user.setMarriage(form.isMarriage()); // 結婚ステータス
 
-        // 更新実行
-        boolean result = userService.updateOne(user);
+        try {
 
-        if (result == true) {
-            model.addAttribute("result", "更新成功");
-        } else {
-            model.addAttribute("result", "更新失敗");
+            // 更新実行
+            boolean result = userService.updateOne(user);
+
+            if (result == true) {
+                model.addAttribute("result", "更新成功");
+            } else {
+                model.addAttribute("result", "更新失敗");
+            }
+        
+        } catch(DataAccessException e) {
+            model.addAttribute("result", "更新失敗(トランザクションテスト)");
         }
 
         // ユーザー一覧画面を表示
@@ -195,5 +202,17 @@ public class HomeController {
         // sample.csvを戻す
         return new ResponseEntity<>(bytes, header, HttpStatus.OK);
         
+    }
+
+
+    // アドミン権限専用画面のGET用メソッド
+    @GetMapping("/admin")
+    public String getAdmin(Model model) {
+    
+        // コンテンツ部分にユーザー詳細を表示するための文字列を登録
+        model.addAttribute("contents", "login/admin :: admin_contents");
+
+        // レイアウト用テンプレート
+        return "login/homeLayout";
     }
 }

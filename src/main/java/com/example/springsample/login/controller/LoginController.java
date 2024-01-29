@@ -21,7 +21,7 @@ public class LoginController {
     @PostMapping("/login")
     public String putLogin(Model model) {
     
-        // ホーム画面に繊維
+        // ホーム画面に遷移(SecurityConfigのformLogin処理 defaultSuccessUrl優先)
         return "redirect:/home";
     }
     
