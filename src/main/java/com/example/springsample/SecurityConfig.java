@@ -12,6 +12,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -42,9 +43,16 @@ public class SecurityConfig {
                 .requestMatchers("/login").permitAll() // ログインページは直リンクOK
                 .requestMatchers("/signup").permitAll() // ユーザー登録画面は直リンクOK
                 .requestMatchers("/error/**").permitAll() // ユーザー登録画面は直リンクOK
+                .requestMatchers("/rest/**").permitAll() // REST許可
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // adminのみ可
                 .anyRequest().authenticated()
         );
+
+        // CSRFを無効にするuRLを設定
+        RequestMatcher csrfMatcher = new RestMatcher("/rest/**");
+
+        // RESTのみCSRF対策を無効に設定
+        http.csrf((csrf) -> csrf.requireCsrfProtectionMatcher(csrfMatcher));
 
         //http.csrf().disable();
         return http.build();
@@ -65,35 +73,3 @@ public class SecurityConfig {
         return users;
     }
 }
-
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    
-    //     // ログイン不要ページの設定
-    //     http
-    //         .authorizeHttpRequests(authz -> authz
-    //             .requestMatchers("/webjars/**").permitAll() // webjarsへアクセス許可
-    //             .requestMatchers("/css/**").permitAll() // cssへアクセス許可
-    //             .requestMatchers("/login").permitAll() // ログインページは直リンクOK
-    //             .requestMatchers("/signup").permitAll() // ユーザー登録画面は直リンクOK
-    //             .requestMatchers("/error").permitAll() // エラー画面は直リンクOK
-    //             .anyRequest().authenticated() // それ以外は直リンク禁止  
-    //         ); 
-            
-    //     http
-    //         .formLogin (login -> login
-    //             .loginProcessingUrl("/login") // ログイン処理のパス
-    //             .loginPage("/login") // ログインページの指定
-    //             .failureUrl("/login") // ログイン失敗時の遷移先
-    //             .usernameParameter("userId") // ログインページのユーザーID
-    //             .passwordParameter("password") // ログインページのパスワード
-    //             .defaultSuccessUrl("/home", true) // ログイン成功時の遷移先; 
-    //             .permitAll()
-    //         );
-        
-        // CSRF対策を無効に設定(一時的)
-        // http.csrf().disable();
-
-        // return http.build();
-    // }
-
